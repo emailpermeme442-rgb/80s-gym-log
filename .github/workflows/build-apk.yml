@@ -11,29 +11,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v2
         with:
           node-version: 18
 
-      - name: Install Bubblewrap CLI
-        run: npm install -g @bubblewrap/cli
+      - name: Install PWABuilder CLI
+        run: npm install -g @pwabuilder/cli
 
-      - name: Build APK
+      - name: Generate Android App Package
         run: |
-          mkdir -p android-app
-          cp index.html android-app/
-          cd android-app
-          echo '{"name": "80S Gym Log", "short_name": "GymLog", "start_url": "./index.html", "display": "standalone", "background_color": "#12091f", "theme_color": "#ff007f"}' > manifest.json
-          
-          bubblewrap init --manifest=manifest.json --directory=./ --skip=androidManifests,keys || true
-          bubblewrap build || true
+          mkdir -p output
+          # Genera il pacchetto Android direttamente dal file index.html locale
+          pwabuilder generate --path ./index.html --name "80S Gym Log" --shortname "GymLog" --background "#12091f" --theme "#ff007f" --start_url "./index.html" --output ./output || true
 
       - name: Find and Move APK
         run: |
@@ -41,7 +31,7 @@ jobs:
           find . -name "*.apk" -exec cp {} final-apk/ \;
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: app-release-apk
           path: final-apk/*.apk

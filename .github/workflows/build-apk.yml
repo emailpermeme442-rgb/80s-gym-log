@@ -12,18 +12,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Install PWABuilder CLI
-        run: npm install -g @pwabuilder/cli
-
-      - name: Generate Android App Package
+      - name: Compile PWA to APK
         run: |
-          mkdir -p output
-          # Genera il pacchetto Android direttamente dal file index.html locale
-          pwabuilder generate --path ./index.html --name "80S Gym Log" --shortname "GymLog" --background "#12091f" --theme "#ff007f" --start_url "./index.html" --output ./output || true
+          npm install -g nativefier
+          # Compila direttamente l'app in un eseguibile/APK nativo usando Nativefier
+          nativefier --name "80S Gym Log" --platform android --arch arm64 ./index.html ./output || true
 
       - name: Find and Move APK
         run: |
@@ -31,7 +28,7 @@ jobs:
           find . -name "*.apk" -exec cp {} final-apk/ \;
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
           path: final-apk/*.apk
